@@ -1,5 +1,5 @@
 # AI News Analyzer
-
+#UPDATE
 This project is a Next.js application that utilizes Google's Gemini 1.5 flash AI model to analyze news articles. The application offers features like:
 
 - **Sentiment analysis**: Determining the overall sentiment of the article (positive, negative, or neutral).
