@@ -1,5 +1,3 @@
-// analyze.js
-
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import axios from "axios";
 import cheerio from "cheerio";
@@ -34,20 +32,19 @@ const isUrl = (string) => {
 
 const extractTextFromUrl = async (url) => {
   try {
-    const { data: html } = await axios.get(url);
-    const $ = cheerio.load(html);
+    const response = await axios.get(url);
+    console.log("Received HTML content:", response.data); // Log the received HTML
 
-    // Extract content from the main text area
-    const bodyText = $("#mw-content-text").text().trim();
-
-    if (!bodyText) {
-      throw new Error("No content found at the specified selector.");
+    if (!response.data) {
+      throw new Error("No content received from URL");
     }
 
+    const $ = cheerio.load(response.data); // Use cheerio to parse the content
+    const bodyText = $("#mw-content-text").text(); // Extract text
     return bodyText;
   } catch (error) {
-    console.error("Error extracting text from URL:", error);
-    throw error;
+    console.error("Error extracting text from URL:", error.message);
+    throw error; // Re-throw the error to handle it further up the chain
   }
 };
 
@@ -152,4 +149,4 @@ export default async function handler(req, res) {
       .status(500)
       .json({ message: "Error analyzing text", error: error.message });
   }
-}
+      }
