@@ -13,11 +13,11 @@ const isUrl = (string) => {
       "\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|" +
       "\\[([0-9a-f]{1,4}:){7,7}[0-9a-f]{1,4}\\]|" +
       "([0-9a-f]{1,4}:){1,7}:|" +
-      "([0-9a-f]{1,4}:){1,6}:[0-9a-f]{1,4}|" +
-      "([0-9a-f]{1,4}:){1,5}(:[0-9a-f]{1,4}){1,2}|" +
-      "([0-9a-f]{1,4}:){1,4}(:[0-9a-f]{1,4}){1,3}|" +
-      "([0-9a-f]{1,4}:){1,3}(:[0-9a-f]{1,4}){1,4}|" +
-      "([0-9a-f]{1,4}:){1,2}(:[0-9a-f]{1,4}){1,5}|" +
+      "([0-9a-f]{1,4}:){1,6}:[0-9a-f]{1,4}|"+
+      "([0-9a-f]{1,4}:){1,5}(:[0-9a-f]{1,4}){1,2}|"+
+      "([0-9a-f]{1,4}:){1,4}(:[0-9a-f]{1,4}){1,3}|"+
+      "([0-9a-f]{1,4}:){1,3}(:[0-9a-f]{1,4}){1,4}|"+
+      "([0-9a-f]{1,4}:){1,2}(:[0-9a-f]{1,4}){1,5}|"+
       "[0-9a-f]{1,4}:((:[0-9a-f]{1,4}){1,6})|" +
       ":((:[0-9a-f]{1,4}){1,7}|:)|" +
       "fe80:(:[0-9a-f]{0,4}){0,4}%[0-9a-zA-Z]{1,}|" +
@@ -30,6 +30,7 @@ const isUrl = (string) => {
   return !!pattern.test(string);
 };
 
+// Function to extract text from the URL using Cheerio
 const extractTextFromUrl = async (url) => {
   try {
     const response = await axios.get(url);
@@ -39,9 +40,9 @@ const extractTextFromUrl = async (url) => {
       throw new Error("No content received from URL");
     }
 
-    const $ = cheerio.load(response.data); // Use cheerio to parse the content
-    const bodyText = $("#mw-content-text").text(); // Extract text
-    return bodyText;
+    const $ = cheerio.load(response.data); // Use Cheerio to parse the content
+    const bodyText = $("#mw-content-text").text(); // Extract text from the content area
+    return bodyText.trim(); // Return the extracted and cleaned text
   } catch (error) {
     console.error("Error extracting text from URL:", error.message);
     throw error; // Re-throw the error to handle it further up the chain
@@ -62,6 +63,7 @@ export default async function handler(req, res) {
   try {
     let inputText = text;
 
+    // Check if the provided text is a URL and extract text from it
     if (isUrl(text)) {
       console.log("Fetching URL:", text);
       inputText = await extractTextFromUrl(text);
@@ -149,4 +151,4 @@ export default async function handler(req, res) {
       .status(500)
       .json({ message: "Error analyzing text", error: error.message });
   }
-      }
+}
