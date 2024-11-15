@@ -1,7 +1,8 @@
 // analyze.js
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import puppeteer from "puppeteer";
+import axios from "axios";
+import cheerio from "cheerio";
 
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -33,17 +34,16 @@ const isUrl = (string) => {
 
 const extractTextFromUrl = async (url) => {
   try {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.goto(url);
+    const { data: html } = await axios.get(url);
+    const $ = cheerio.load(html);
 
-    await page.waitForSelector("#mw-content-text");
+    // Extract content from the main text area
+    const bodyText = $("#mw-content-text").text().trim();
 
-    const bodyText = await page.evaluate(() => {
-      return document.querySelector("#mw-content-text").innerText;
-    });
+    if (!bodyText) {
+      throw new Error("No content found at the specified selector.");
+    }
 
-    await browser.close();
     return bodyText;
   } catch (error) {
     console.error("Error extracting text from URL:", error);
